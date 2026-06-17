@@ -1,0 +1,80 @@
+classDiagram
+
+class MemberStatus {
+  <<enumeration>>
+  ACTIVE
+  BLOCKED
+  EXPIRED
+}
+
+class BookStatus {
+  <<enumeration>>
+  AVAILABLE
+  BORROWED
+  DAMAGED
+  LOST
+}
+
+class LoanStatus {
+  <<enumeration>>
+  ACTIVE
+  RETURNED
+  OVERDUE
+}
+
+class Library {
+  +String libraryId
+  +String name
+  +String location
+
+  +addBook(book: Book) void
+  +registerMember(member: Member) void
+}
+
+class Member {
+  +String memberId
+  +String name
+  +String email
+  +MemberStatus status
+
+  +Integer maxAllowedLoans
+  +borrowBook(book: Book) Loan
+  +returnBook(book: Book) Boolean
+  +canBorrow() Boolean
+}
+
+class Book {
+  +String bookId
+  +String title
+  +String author
+  +String isbn
+  +BookStatus status
+
+  +markBorrowed() void
+  +markAvailable() void
+  +isAvailable() Boolean
+}
+
+class Loan {
+  +String loanId
+  +Date borrowedDate
+  +Date dueDate
+  +Date returnDate
+  +LoanStatus status
+  
+  +closeLoan(returnDate: Date) void
+  +isOverDue() Boolean
+}
+
+Library "1" o-- "0..*" Book : contains
+Library "1" o-- "0..*" Member : registers
+
+Member "1" *-- "0..*" Loan : owns
+Book "1" <-- "0..*" Loan : loaned in
+
+Member ..> Book : borrows
+Loan ..> Book : refers to
+
+Member --> MemberStatus : status
+Book --> BookStatus : status
+Loan --> LoanStatus : status
