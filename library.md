@@ -109,6 +109,55 @@ addBook(book:Book): void
 registerMember(member:Member):void
 
 
+## OCL (Object Constraint Language)
+
+### Syntax
+context ClassName
+inv ConstraintName: condition // The condition should be true
+
+context Member:borrowBook(book):
+inv ActiveMemberCanBorrow:
+    self.status = MemberStatus::Active and Member.NumberOfActiveLoans >=1
+
+
+### BankAccout Withdraw
+
+
+Customer
+---------
+customerId: string
+name: string
+
+Account:
+-------- 
+accountNo:string
+balance: double
+
+Operation
+----------
+withDraw(amount: double)
+
+inv --> Invariant
+pre --> Precondition
+post --> Postcondition
+
+## Before Withdrawal 
+    - Preconditon
+
+context Account
+inv NonNegativeBalance:
+    self.Balance>=0
+
+context Account:withDraw(amount: double)
+pre SufficientBalance:
+    amount > 0 and self.balance >= amount
+
+context Account:withDraw(amount: double)
+post BalanceUpdated:
+     self.balance = self.balance@pre-amount
+
+
+
 
 
 
