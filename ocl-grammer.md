@@ -23,4 +23,10 @@
 ## Object being consratied
     - self
 
+# Builtin types and literals
+
+- Boolean : true | false
+- Integer: +ve and -ve numbers
+- Real: real numbers, rational, irreational(decimal) all sorts of numbers
+- String: collection of characters (utf-8 char sequence is used)
 

@@ -6,15 +6,18 @@
             - balance: Real
             - minimumBalance: Real
             - status: String
+            - priorityStatus: String # later added to explain init with computation
             - isActive: Boolean
-            - overDraftAllowed: Boolean 
+            - overDraftAllowed: Boolean
+            - availableBalanceAmount: Real # Later added to explain decalre keyword
+
                 Note: Assume overDraftAllowed is true then additional 10000 is alloed to be debited
 
         - Operations
             - withDraw(amount: Real): Boolean
             - deposit(amount: Real): Boolean
 
-## OCL 
+## OCL keywords implementations
 
 package Banking
 
@@ -87,7 +90,7 @@ package Banking
     post ReturnsTrue:
         result = true implies self.balance = self.balances@pre - amount
 
-    # availableBalance is a calculated reusable value
+    # availableBalance is a calculated reusable value,it is kind of a helper(helper operations) , generally def are not the properties defined in Model(s)
     context Account
     def: availableBalance:Real = 
         if self.overDraftAllowed then
@@ -95,13 +98,50 @@ package Banking
         else
             self.balance
         endif
-        
+
     # using the definition called availableBalance
     context Account:withdraw(amount:Real):Boolean
     pre EnoughBalance:
         amount <= self.availableBalance
 
+    # if and let are local temporary variables, used only in the local expression
+        creata temo variable totalAmount, and use that variable in the expression,only for that particular context, is what let and in are used for 
 
+    context Account
+    inv HighValueAccount:
+        let totalAmount:Real = self.balance + 10000 in
+            totalAmount >= 50000
+    
+    # derive, there is an attribute availableBalanceAmount is there in the model Account
+        to computate that particular derive
+     availableBalanceAmount is derived from overDraftedAllowd and balance
+    
+    context Account: availableBalanceAmount: Real
+    drive:
+        if self.overDraftAllowed then
+            self.balance+10000
+        else
+            self.balance
+        endif
+    
+    # init is to give initial value 
+
+    context Account:balance:Real:
+    init:
+        0
+    
+    context Account:status: String:
+    init:
+        'ACTIVE'
+    # making computational init value
+
+    context Account:priorityStatus: String
+    init:
+        if self.balance>=10000 then
+        "PREMIUM"
+        else
+        "NORMAL"
+        endif
 endpackage
 
 
