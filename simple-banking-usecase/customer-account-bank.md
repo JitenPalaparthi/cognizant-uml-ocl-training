@@ -144,6 +144,20 @@ package Banking
         endif
 endpackage
 
+### OCL implementation notes for deposit operation
+
+- The account should be ACTIVE or ACTIVE_LEEN
+- The amount shoulbe > 0 
+- possisble include minimumDepositAmount context which is 500
+- if the minimumDepositAmount >= 500 then only deposit should be done
+- note: there is no attribute to store minimumDepositAmount, it has to be computated based on a def
+- check the deposite can also be resulted balance as  -ve amount as is the Account has overDraftAllowed->true
+- ex.. overDraftAllowed is true, balance is 5000 but withdraw 10000, then the balance is -5000
+- when deposit 5000 , the balance would not become 5000 but 0 .. -5000+5000 = 0
+- once deposited it returns BOOLEAN so result is true | false 
+- true means successfully deposited, hence there is credit to the balance
+- false means failure to deposit, no operation
+
 
 
 
