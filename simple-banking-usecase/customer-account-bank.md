@@ -7,7 +7,8 @@
             - minimumBalance: Real
             - status: String
             - isActive: Boolean
-            - overDraftAllowed: Boolean
+            - overDraftAllowed: Boolean 
+                Note: Assume overDraftAllowed is true then additional 10000 is alloed to be debited
 
         - Operations
             - withDraw(amount: Real): Boolean
@@ -68,16 +69,41 @@ package Banking
             self.balance >= self.minimumBalance
         endif
 
- 
+    # pre condition to withdraw before going perform that operation it has to check , sufficient balance is there
+    
+    context Account:withdraw(amount: Real):Boolean
+    pre AccountValidTowithDraw:
+        self.balance >= amount  
+
+    # post conditon, after withdrawal the new balance should be the old balance - amount
+
+    context Account:withdraw(amount: Real):Boolean
+    post BalanceReduced:
+        self.balance = self.balances@pre - amount
+    
+    # if withdraw returns true, then the balance must be reduced
+
+    context Account:withdraw(amount: Real):Boolean
+    post ReturnsTrue:
+        result = true implies self.balance = self.balances@pre - amount
+
+    # availableBalance is a calculated reusable value
+    context Account
+    def: availableBalance:Real = 
+        if self.overDraftAllowed then
+            self.balance+10000
+        else
+            self.balance
+        endif
+        
+    # using the definition called availableBalance
+    context Account:withdraw(amount:Real):Boolean
+    pre EnoughBalance:
+        amount <= self.availableBalance
+
 
 endpackage
 
-<!-- 5 xor 3 --> 5^3
 
-XOR.          AND.        OR
-5 = 0101      0101       0101
-3 = 0011      0011       0011
---------    -------     ------- 
-6 = 0110.   1=0001      7=0111 -->
 
 

@@ -1,0 +1,10 @@
+
+Note: Nothing to do with ocl or uml just to explain what is xor
+Simple logical operators
+----------------------------
+
+XOR.          AND.        OR
+5 = 0101      0101       0101
+3 = 0011      0011       0011
+--------    -------     ------- 
+6 = 0110.   1=0001      7=0111
