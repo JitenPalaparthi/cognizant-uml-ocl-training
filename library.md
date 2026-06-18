@@ -119,10 +119,7 @@ context Member:borrowBook(book):
 inv ActiveMemberCanBorrow:
     self.status = MemberStatus::Active and Member.NumberOfActiveLoans >=1
 
-
 ### BankAccout Withdraw
-
-
 Customer
 ---------
 customerId: string

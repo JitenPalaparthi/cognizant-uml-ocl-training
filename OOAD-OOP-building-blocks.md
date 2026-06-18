@@ -4,11 +4,11 @@
 
 ## Encapsulation
 
-    ### Access specifiers
-        - Public
-        - Private
-        - Protected
-        - Internal
+### Access specifiers
+    - Public
+    - Private
+    - Protected
+    - Internal
 
 ## Polymorphism
 
@@ -20,20 +20,20 @@
 
 ## Association 
 
-    ### One-One-Association
-            - Person -> Passport
+### One-One-Association
+    - Person -> Passport
 
-    ### One-To-Many-Association
-            - Customer -> Orders
+### One-To-Many-Association
+    - Customer -> Orders
     
-    ### Many-To-One-Association
-            - Employees-CTO
-            - Emoloyees-Department
+### Many-To-One-Association
+    - Employees-CTO
+    - Emoloyees-Department
     
-    ### Many-To-Many
-        - Students -> Courses
-        - A student join in many courses
-        - A course can have many students
+### Many-To-Many
+    - Students -> Courses
+    - A student join in many courses
+    - A course can have many students
     
 ## Aggregation (Has-A)
 
@@ -79,5 +79,3 @@
 ## Component 
 
     - Deployable unit 
-
-
