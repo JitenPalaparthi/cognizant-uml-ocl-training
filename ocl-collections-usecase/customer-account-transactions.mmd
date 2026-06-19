@@ -1,0 +1,34 @@
+classDiagram
+
+class Bank{
+    +String: name
+    +String: location
+    +String: ifsc
+}
+class Customer{
+    +String: name
+    +Integer: age
+}
+
+class Account{
+    +String: accountNo
+    +Real: balance
+    +String: status
+}
+
+class Transaction{
+    +Real: amount
+    +String: type
+}
+
+class Feedback{
+    +Integer: ratings
+    +String: comment
+}
+
+Bank "1" o-- "0..*" Customer: has
+
+Customer "1" *-- "0..*" Account: owns
+Account "1" *-- "0..*" Transaction : owns
+
+Customer "1" o-- "0..*" Feedback: gives
