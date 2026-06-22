@@ -1,0 +1,451 @@
+@startuml
+title Employee and Payment using Composition
+
+interface Payable {
+  +calculatePay(): double
+  +generatePayslip(): String
+}
+
+interface BonusPolicy {
+  +calculateBonus(): double
+}
+
+enum EmployeeType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+}
+
+enum Department {
+  ENGINEERING
+  HR
+  FINANCE
+  SALES
+}
+
+class Employee {
+  -id: int
+  -name: String
+  -email: String
+  -department: Department
+  -employeeType: EmployeeType
+  -payment: Payable
+  -bonusPolicy: BonusPolicy
+
+  +Employee(id: int, name: String, email: String, payment: Payable)
+  +getId(): int
+  +getName(): String
+  +getEmail(): String
+  +setEmail(email: String): void
+  +getDepartment(): Department
+  +setDepartment(department: Department): void
+  +calculatePay(): double
+  +calculateBonus(): double
+  +generatePayslip(): String
+}
+
+class FullTimePayment {
+  -monthlySalary: double
+  -bonusPercentage: double
+
+  +FullTimePayment(salary: double, bonusPercentage: double)
+  +calculatePay(): double
+  +generatePayslip(): String
+}
+
+class PartTimePayment {
+  -hourlyRate: double
+  -hoursWorked: int
+
+  +PartTimePayment(hourlyRate: double)
+  +addHours(hours: int): void
+  +calculatePay(): double
+  +generatePayslip(): String
+}
+
+class ContractPayment {
+  -contractAmount: double
+  -contractDurationMonths: int
+
+  +ContractPayment(amount: double, durationMonths: int)
+  +calculatePay(): double
+  +generatePayslip(): String
+}
+
+class FixedBonusPolicy {
+  -amount: double
+  +calculateBonus(): double
+}
+
+class PercentageBonusPolicy {
+  -percentage: double
+  -baseSalary: double
+  +calculateBonus(): double
+}
+
+class NoBonusPolicy {
+  +calculateBonus(): double
+}
+
+class PayrollService {
+  +processPayroll(employee: Employee): void
+  +printPayslip(employee: Employee): void
+}
+
+Employee *-- Payable
+Employee *-- BonusPolicy
+
+Payable <|.. FullTimePayment
+Payable <|.. PartTimePayment
+Payable <|.. ContractPayment
+
+BonusPolicy <|.. FixedBonusPolicy
+BonusPolicy <|.. PercentageBonusPolicy
+BonusPolicy <|.. NoBonusPolicy
+
+Employee --> Department
+Employee --> EmployeeType
+
+PayrollService ..> Employee
+
+note bottom
+=========================
+OCL CONSTRAINTS
+=========================
+
+-- Employee basic rules
+
+context Employee
+inv IdMustBePositive:
+    self.id > 0
+
+context Employee
+inv NameMustNotBeEmpty:
+    self.name <> null and self.name.size() > 0
+
+context Employee
+inv EmailMustNotBeEmpty:
+    self.email <> null and self.email.size() > 0
+
+context Employee
+inv EmailMustContainAt:
+    self.email.indexOf('@') > 0
+
+context Employee
+inv DepartmentMustExist:
+    self.department <> null
+
+context Employee
+inv EmployeeTypeMustExist:
+    self.employeeType <> null
+
+context Employee
+inv PaymentMustExist:
+    self.payment <> null
+
+context Employee
+inv BonusPolicyMustExist:
+    self.bonusPolicy <> null
+
+context Employee
+inv UniqueEmployeeId:
+    Employee.allInstances()->isUnique(e | e.id)
+
+context Employee
+inv UniqueEmployeeEmail:
+    Employee.allInstances()->isUnique(e | e.email)
+
+-- Employee delegates payment and bonus to composed objects
+
+context Employee
+inv EmployeePayDelegatesToPayment:
+    self.calculatePay() = self.payment.calculatePay()
+
+context Employee
+inv EmployeeBonusDelegatesToBonusPolicy:
+    self.calculateBonus() = self.bonusPolicy.calculateBonus()
+
+context Employee
+inv EmployeePayslipDelegatesToPayment:
+    self.generatePayslip() = self.payment.generatePayslip()
+
+-- EmployeeType must match payment object
+
+context Employee
+inv FullTimeTypeRequiresFullTimePayment:
+    self.employeeType = EmployeeType::FULL_TIME implies
+    self.payment.oclIsTypeOf(FullTimePayment)
+
+context Employee
+inv PartTimeTypeRequiresPartTimePayment:
+    self.employeeType = EmployeeType::PART_TIME implies
+    self.payment.oclIsTypeOf(PartTimePayment)
+
+context Employee
+inv ContractTypeRequiresContractPayment:
+    self.employeeType = EmployeeType::CONTRACT implies
+    self.payment.oclIsTypeOf(ContractPayment)
+
+-- FullTimePayment rules
+
+context FullTimePayment
+inv MonthlySalaryMustBePositive:
+    self.monthlySalary > 0
+
+context FullTimePayment
+inv BonusPercentageMustBeValid:
+    self.bonusPercentage >= 0 and self.bonusPercentage <= 100
+
+context FullTimePayment
+inv CalculatePayReturnsMonthlySalary:
+    self.calculatePay() = self.monthlySalary
+
+context FullTimePayment
+inv PayslipMustNotBeEmpty:
+    self.generatePayslip() <> null and
+    self.generatePayslip().size() > 0
+
+-- PartTimePayment rules
+
+context PartTimePayment
+inv HourlyRateMustBePositive:
+    self.hourlyRate > 0
+
+context PartTimePayment
+inv HoursWorkedCannotBeNegative:
+    self.hoursWorked >= 0
+
+context PartTimePayment
+inv HoursWorkedMaximumLimit:
+    self.hoursWorked <= 240
+
+context PartTimePayment
+inv CalculatePayReturnsHourlyPay:
+    self.calculatePay() = self.hourlyRate * self.hoursWorked
+
+context PartTimePayment
+inv ZeroHoursMeansZeroPay:
+    self.hoursWorked = 0 implies self.calculatePay() = 0
+
+context PartTimePayment
+inv PayslipMustNotBeEmpty:
+    self.generatePayslip() <> null and
+    self.generatePayslip().size() > 0
+
+-- ContractPayment rules
+
+context ContractPayment
+inv ContractAmountMustBePositive:
+    self.contractAmount > 0
+
+context ContractPayment
+inv ContractDurationMustBePositive:
+    self.contractDurationMonths > 0
+
+context ContractPayment
+inv ContractDurationMaximumLimit:
+    self.contractDurationMonths <= 60
+
+context ContractPayment
+inv CalculatePayReturnsContractAmount:
+    self.calculatePay() = self.contractAmount
+
+context ContractPayment
+inv MonthlyContractValueMustBePositive:
+    self.contractAmount / self.contractDurationMonths > 0
+
+context ContractPayment
+inv PayslipMustNotBeEmpty:
+    self.generatePayslip() <> null and
+    self.generatePayslip().size() > 0
+
+-- Bonus policy rules
+
+context FixedBonusPolicy
+inv FixedBonusAmountCannotBeNegative:
+    self.amount >= 0
+
+context FixedBonusPolicy
+inv FixedBonusCalculation:
+    self.calculateBonus() = self.amount
+
+context PercentageBonusPolicy
+inv PercentageMustBeValid:
+    self.percentage >= 0 and self.percentage <= 100
+
+context PercentageBonusPolicy
+inv BaseSalaryMustBePositive:
+    self.baseSalary > 0
+
+context PercentageBonusPolicy
+inv PercentageBonusCalculation:
+    self.calculateBonus() =
+        self.baseSalary * self.percentage / 100
+
+context NoBonusPolicy
+inv NoBonusMustReturnZero:
+    self.calculateBonus() = 0
+
+-- Payable interface rules
+
+context Payable
+inv PayMustNotBeNegative:
+    self.calculatePay() >= 0
+
+context Payable
+inv PayslipMustNotBeEmpty:
+    self.generatePayslip() <> null and
+    self.generatePayslip().size() > 0
+
+-- BonusPolicy interface rules
+
+context BonusPolicy
+inv BonusMustNotBeNegative:
+    self.calculateBonus() >= 0
+
+-- Constructor rules
+
+context Employee::Employee(id: int, name: String, email: String, payment: Payable)
+pre ValidId:
+    id > 0
+
+pre ValidName:
+    name <> null and name.size() > 0
+
+pre ValidEmail:
+    email <> null and email.indexOf('@') > 0
+
+pre PaymentMustNotBeNull:
+    payment <> null
+
+post IdAssigned:
+    self.id = id
+
+post NameAssigned:
+    self.name = name
+
+post EmailAssigned:
+    self.email = email
+
+post PaymentAssigned:
+    self.payment = payment
+
+context FullTimePayment::FullTimePayment(salary: double, bonusPercentage: double)
+pre SalaryMustBePositive:
+    salary > 0
+
+pre BonusPercentageValid:
+    bonusPercentage >= 0 and bonusPercentage <= 100
+
+post SalaryAssigned:
+    self.monthlySalary = salary
+
+post BonusPercentageAssigned:
+    self.bonusPercentage = bonusPercentage
+
+context PartTimePayment::PartTimePayment(hourlyRate: double)
+pre HourlyRateMustBePositive:
+    hourlyRate > 0
+
+post HourlyRateAssigned:
+    self.hourlyRate = hourlyRate
+
+post InitialHoursWorkedZero:
+    self.hoursWorked = 0
+
+context ContractPayment::ContractPayment(amount: double, durationMonths: int)
+pre AmountMustBePositive:
+    amount > 0
+
+pre DurationMustBePositive:
+    durationMonths > 0
+
+post AmountAssigned:
+    self.contractAmount = amount
+
+post DurationAssigned:
+    self.contractDurationMonths = durationMonths
+
+-- Operation contracts
+
+context Employee::getId(): int
+post ReturnsId:
+    result = self.id
+
+context Employee::getName(): String
+post ReturnsName:
+    result = self.name
+
+context Employee::getEmail(): String
+post ReturnsEmail:
+    result = self.email
+
+context Employee::setEmail(email: String)
+pre ValidEmail:
+    email <> null and email.indexOf('@') > 0
+
+post EmailUpdated:
+    self.email = email
+
+context Employee::getDepartment(): Department
+post ReturnsDepartment:
+    result = self.department
+
+context Employee::setDepartment(department: Department)
+pre DepartmentMustNotBeNull:
+    department <> null
+
+post DepartmentUpdated:
+    self.department = department
+
+context Employee::calculatePay(): double
+post ReturnsPaymentPay:
+    result = self.payment.calculatePay()
+
+context Employee::calculateBonus(): double
+post ReturnsBonusPolicyBonus:
+    result = self.bonusPolicy.calculateBonus()
+
+context Employee::generatePayslip(): String
+post ReturnsGeneratedPayslip:
+    result = self.payment.generatePayslip()
+
+context PartTimePayment::addHours(hours: int)
+pre HoursMustBePositive:
+    hours > 0
+
+pre TotalHoursMustBeWithinLimit:
+    self.hoursWorked + hours <= 240
+
+post HoursAdded:
+    self.hoursWorked = self.hoursWorked@pre + hours
+
+-- PayrollService rules
+
+context PayrollService::processPayroll(employee: Employee)
+pre EmployeeMustNotBeNull:
+    employee <> null
+
+pre EmployeeMustHavePayment:
+    employee.payment <> null
+
+pre EmployeePayMustBePositive:
+    employee.calculatePay() > 0
+
+post PayrollProcessed:
+    true
+
+context PayrollService::printPayslip(employee: Employee)
+pre EmployeeMustNotBeNull:
+    employee <> null
+
+pre PayslipMustExist:
+    employee.generatePayslip() <> null and
+    employee.generatePayslip().size() > 0
+
+post PayslipPrinted:
+    true
+
+end note
+
+@enduml
