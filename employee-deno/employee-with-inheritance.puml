@@ -1,0 +1,88 @@
+@startuml
+title Employee and Payment
+
+interface Payable {
+  +calculatePay(): double
+  +generatePayslip(): String
+}
+
+enum EmployeeType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+}
+
+enum Department {
+  ENGINEERING
+  HR
+  FINANCE
+  SALES
+}
+
+abstract class Employee {
+  -id: int
+  -name: String
+  -email: String
+  -department: Department
+  -employeeType: EmployeeType
+
+  +Employee(id: int, name: String, email: String)
+  +getId(): int
+  +getName(): String
+  +getEmail(): String
+  +setEmail(email: String): void
+  +getDepartment(): Department
+  +setDepartment(department: Department): void
+  +abstract calculateBonus(): double
+}
+
+class FullTimeEmployee {
+  -monthlySalary: double
+  -bonusPercentage: double
+
+  +FullTimeEmployee(id: int, name: String, email: String, salary: double)
+  +calculatePay(): double
+  +calculateBonus(): double
+  +generatePayslip(): String
+}
+
+class PartTimeEmployee {
+  -hourlyRate: double
+  -hoursWorked: int
+
+  +PartTimeEmployee(id: int, name: String, email: String, hourlyRate: double)
+  +addHours(hours: int): void
+  +calculatePay(): double
+  +calculateBonus(): double
+  +generatePayslip(): String
+}
+
+class ContractEmployee {
+  -contractAmount: double
+  -contractDurationMonths: int
+
+  +ContractEmployee(id: int, name: String, email: String, amount: double)
+  +calculatePay(): double
+  +calculateBonus(): double
+  +generatePayslip(): String
+}
+
+class PayrollService {
+  +processPayroll(employee: Payable): void
+  +printPayslip(employee: Payable): void
+}
+
+Employee <|-- FullTimeEmployee
+Employee <|-- PartTimeEmployee
+Employee <|-- ContractEmployee
+
+Payable <|.. FullTimeEmployee
+Payable <|.. PartTimeEmployee
+Payable <|.. ContractEmployee
+
+Employee --> Department
+Employee --> EmployeeType
+
+PayrollService ..> Payable
+
+@enduml

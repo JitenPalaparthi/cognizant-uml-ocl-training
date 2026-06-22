@@ -1,0 +1,40 @@
+@startuml
+
+class Customer {
+    name : String
+    age : Integer
+}
+
+class Account {
+    accountNo : String
+    balance : Real
+    status : AccountStatus
+}
+
+class Transaction {
+    amount : Real
+    type : String
+}
+
+enum AccountStatus {
+    ACTIVE
+    INACTIVE
+    BLOCKED
+}
+
+Customer "1" *-- "0..*" Account : accounts
+Account "1" *-- "0..*" Transaction : transactions
+
+note right of Customer
+context Customer
+inv AdultCustomer:
+    self.age >= 18
+end note
+
+note right of Account
+context Account
+inv PositiveBalance:
+    self.balance >= 0
+end note
+
+@enduml
