@@ -86,3 +86,103 @@ Employee --> EmployeeType
 PayrollService ..> Payable
 
 @enduml
+
+note constraints
+
+context Employee
+inv IdMustBePositive:
+    self.id > 0
+
+context Employee
+inv UniqueEmployeeId:
+    Employee.allInstances()->isUnique(e | e.id)
+
+context FullTimeEmployee
+inv MonthlySalaryMustBePositive:
+    self.monthlySalary > 0
+
+
+context Employee
+inv NameMinimumLength:
+    self.name.size() >= 2
+
+context Employee
+inv NameMaximumLength:
+    self.name.size() <= 100
+
+context Employee
+inv EmailMinimumLength:
+    self.email.size() >= 5
+
+context Employee
+inv EmailMustContainDot:
+    self.email.indexOf('.') > 0
+
+context Employee
+inv EmailMustNotStartWithAt:
+    self.email.indexOf('@') <> 1
+
+context Employee
+inv EmailMustHaveDomain:
+    self.email.substring(self.email.indexOf('@') + 1, self.email.size()).size() > 0
+
+context Employee
+inv ValidDepartment:
+    self.department = Department::ENGINEERING or
+    self.department = Department::HR or
+    self.department = Department::FINANCE or
+    self.department = Department::SALES
+
+context Employee
+inv ValidEmployeeType:
+    self.employeeType = EmployeeType::FULL_TIME or
+    self.employeeType = EmployeeType::PART_TIME or
+    self.employeeType = EmployeeType::CONTRACT
+
+context FullTimeEmployee
+inv FullTimeMonthlySalaryMinimum:
+    self.monthlySalary >= 10000
+
+context FullTimeEmployee
+inv FullTimeMonthlySalaryMaximum:
+    self.monthlySalary <= 1000000
+
+context FullTimeEmployee
+inv FullTimeBonusCannotExceedSalary:
+    self.calculateBonus() <= self.monthlySalary
+
+context FullTimeEmployee
+inv FullTimeTotalPay:
+    self.calculatePay() + self.calculateBonus() > 0
+
+
+context PartTimeEmployee
+inv PartTimeHourlyRateMinimum:
+    self.hourlyRate >= 100
+
+context PartTimeEmployee
+inv PartTimeHourlyRateMaximum:
+    self.hourlyRate <= 10000
+
+context PartTimeEmployee
+inv PartTimeMonthlyPayLimit:
+    self.calculatePay() <= 500000
+
+context PartTimeEmployee
+inv PartTimeZeroHoursZeroPay:
+    self.hoursWorked = 0 implies self.calculatePay() = 0
+
+
+context ContractEmployee
+inv ContractAmountMinimum:
+    self.contractAmount >= 10000
+
+context ContractEmployee
+inv ContractAmountMaximum:
+    self.contractAmount <= 10000000
+
+context ContractEmployee
+inv MonthlyContractValuePositive:
+    self.contractAmount / self.contractDurationMonths > 0
+
+end note
